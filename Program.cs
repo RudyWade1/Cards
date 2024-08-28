@@ -14,38 +14,78 @@ namespace Cards
 
     class Crupier
     {
-        Deck deck = new Deck();
+        private const string TakeCardsOption = "1";
+        private const string ExitOption = "2";
+
+        private Deck _deck = new Deck();
+        private Player _player = new Player();
 
         public void StartGame()
         {
             bool isWork = true;
-            deck.AddCart();
+            _deck.AddCards();
 
             while (isWork)
             {
-                Console.WriteLine("1 - вытянуть карты\n2 - выйти из програмы");
+                Console.WriteLine($"{TakeCardsOption} - вытянуть карты\n{ExitOption} - выйти из программы");
                 string userChoice = Console.ReadLine();
 
                 switch (userChoice)
                 {
-                    case "1":
-                        deck.TakeCards();
+                    case TakeCardsOption:
+                        TakeCardsFromDeck();
                         break;
-                    case "2":
+                    case ExitOption:
                         isWork = false;
                         break;
+                    default:
+                        Console.WriteLine("Некорректный выбор. Попробуйте снова.");
+                        break;
                 }
+            }
+        }
+
+        private void TakeCardsFromDeck()
+        {
+            Console.WriteLine("Какое количество карт вытянуть?");
+            string userInput = Console.ReadLine();
+
+            if (int.TryParse(userInput, out int number))
+            {
+                if (number > _deck.RemainingCards())
+                {
+                    Console.WriteLine($"В колоде осталось только {_deck.RemainingCards()} карт. Выберите меньшее количество.");
+                    return; 
+                }
+
+                List<Card> cards = _deck.TakeCards(number);
+                _player.AddCards(cards);
+                _player.ShowCards();
+            }
+            else
+            {
+                Console.WriteLine("Некорректный ввод. Введите число.");
             }
         }
     }
 
     class Player
     {
-        public int PlayerCardCount { get; private set; }
+        private List<Card> _cards = new List<Card>();
 
-        public Player(int playerCardCount)
+        public void AddCards(List<Card> cards)
         {
-            PlayerCardCount = playerCardCount;
+            _cards.AddRange(cards);
+        }
+
+        public void ShowCards()
+        {
+            Console.WriteLine("Карты игрока:");
+
+            foreach (var card in _cards)
+            {
+                Console.WriteLine(card.CartValue);
+            }
         }
     }
 
@@ -53,7 +93,12 @@ namespace Cards
     {
         private List<Card> _cards = new List<Card>();
 
-        public void AddCart()
+        public int RemainingCards()
+        {
+            return _cards.Count;
+        }
+
+        public void AddCards()
         {
             int maxCardCount = 14;
 
@@ -64,45 +109,32 @@ namespace Cards
             }
         }
 
-        public void TakeCards()
+        public List<Card> TakeCards(int amount)
         {
-            Console.WriteLine("Какое количество карт вытянуть?");
-            string userInput = Console.ReadLine();
+            List<Card> takenCards = new List<Card>();
 
-            if (int.TryParse(userInput, out int number))
+            for (int i = 0; i < amount; i++)
             {
-                Player cartCount = new Player(number);
-
-                if (cartCount.PlayerCardCount <= _cards.Count)
-                    ShowCards(cartCount.PlayerCardCount);
-                else
-                    Console.WriteLine($"В колоде недостаточно карт. Осталось {_cards.Count} карт.");
-            }
-        }
-
-        public void ShowCards(int cardsCount)
-        {
-            for (int i = 0; i < cardsCount; i++)
-            {
-                Console.WriteLine(_cards[0]._cartValue);
-
+                takenCards.Add(_cards[0]);
                 DeleteCard();
             }
+
+            return takenCards;
         }
 
-        public void DeleteCard()
+        private void DeleteCard()
         {
-            _cards.Remove(_cards[0]);
+            _cards.RemoveAt(0);
         }
     }
 
     class Card
     {
-        public CardValue _cartValue { get; private set; }
+        public CardValue CartValue { get; private set; }
 
         public Card(CardValue cartValue)
         {
-            _cartValue = cartValue;
+            CartValue = cartValue;
         }
     }
 

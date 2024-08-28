@@ -1,0 +1,7 @@
+C:\Users\Админ\source\repos\Card\Card\bin\Debug\Card.exe.config
+C:\Users\Админ\source\repos\Card\Card\bin\Debug\Card.exe
+C:\Users\Админ\source\repos\Card\Card\bin\Debug\Card.pdb
+C:\Users\Админ\source\repos\Card\Card\obj\Debug\Card.csproj.AssemblyReference.cache
+C:\Users\Админ\source\repos\Card\Card\obj\Debug\Card.csproj.CoreCompileInputs.cache
+C:\Users\Админ\source\repos\Card\Card\obj\Debug\Card.exe
+C:\Users\Админ\source\repos\Card\Card\obj\Debug\Card.pdb
