@@ -1,90 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Cards
+namespace Переменные
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
-            Crupier crupier = new Crupier();
-            crupier.StartGame();
+            Deck deck = new Deck();
+            Player player = new Player();
+            Croupier croupier = new Croupier(deck, player);
+
+            Console.Write("Сколько карт выдать игроку? ");
+            string userInput = Console.ReadLine();
+
+            if (int.TryParse(userInput, out int card))
+            {
+                croupier.DealCards(card);
+            }
+
+            Console.WriteLine("\nКарты у игрока на руках:");
+            player.ShowHand();
         }
     }
 
-    class Crupier
+    class Card
     {
-        private const string TakeCardsOption = "1";
-        private const string ExitOption = "2";
+        public string Suit { get; private set; }
+        public string Value { get; private set; }
 
-        private Deck _deck = new Deck();
-        private Player _player = new Player();
-
-        public void StartGame()
+        public Card(string suit, string value)
         {
-            bool isWork = true;
-            _deck.AddCards();
-
-            while (isWork)
-            {
-                Console.WriteLine($"{TakeCardsOption} - вытянуть карты\n{ExitOption} - выйти из программы");
-                string userChoice = Console.ReadLine();
-
-                switch (userChoice)
-                {
-                    case TakeCardsOption:
-                        TakeCardsFromDeck();
-                        break;
-                    case ExitOption:
-                        isWork = false;
-                        break;
-                    default:
-                        Console.WriteLine("Некорректный выбор. Попробуйте снова.");
-                        break;
-                }
-            }
-        }
-
-        private void TakeCardsFromDeck()
-        {
-            Console.WriteLine("Какое количество карт вытянуть?");
-            string userInput = Console.ReadLine();
-
-            if (int.TryParse(userInput, out int number))
-            {
-                if (number > _deck.RemainingCards())
-                {
-                    Console.WriteLine($"В колоде осталось только {_deck.RemainingCards()} карт. Выберите меньшее количество.");
-                    return; 
-                }
-
-                List<Card> cards = _deck.TakeCards(number);
-                _player.AddCards(cards);
-                _player.ShowCards();
-            }
-            else
-            {
-                Console.WriteLine("Некорректный ввод. Введите число.");
-            }
+            Suit = suit;
+            Value = value;
         }
     }
 
     class Player
     {
-        private List<Card> _cards = new List<Card>();
+        private List<Card> _hand = new List<Card>();
 
-        public void AddCards(List<Card> cards)
+        public void TakeCard(Card card)
         {
-            _cards.AddRange(cards);
+            _hand.Add(card);
         }
 
-        public void ShowCards()
+        public void ShowHand()
         {
-            Console.WriteLine("Карты игрока:");
-
-            foreach (var card in _cards)
+            foreach (Card card in _hand)
             {
-                Console.WriteLine(card.CartValue);
+                Console.WriteLine($"Масть: {card.Suit}, Номинал: {card.Value}");
             }
         }
     }
@@ -93,66 +58,48 @@ namespace Cards
     {
         private List<Card> _cards = new List<Card>();
 
-        public int RemainingCards()
+        public Deck()
         {
-            return _cards.Count;
-        }
+            string[] suits = { "Черви", "Буби", "Крести", "Пики" };
+            string[] values = { "6", "7", "8", "9", "10", "Валет", "Дама", "Король", "Туз" };
 
-        public void AddCards()
-        {
-            int maxCardCount = 14;
-
-            for (int i = 0; i < maxCardCount; i++)
+            foreach (string suit in suits)
             {
-                Card card = new Card((CardValue)i);
-                _cards.Add(card);
+                foreach (var value in values)
+                {
+                    _cards.Add(new Card(suit, value));
+                }
             }
         }
 
-        public List<Card> TakeCards(int amount)
+        public Card DrawCard()
         {
-            List<Card> takenCards = new List<Card>();
+            int lastCard = _cards.Count - 1;
+            Card chosenCard = _cards[lastCard];
+            _cards.RemoveAt(lastCard);
+            return chosenCard;
+        }
+    }
 
-            for (int i = 0; i < amount; i++)
+    class Croupier
+    {
+        private Deck _deck;
+        private Player _player;
+
+        public Croupier(Deck deck, Player player)
+        {
+            _deck = deck;
+            _player = player;
+        }
+
+        public void DealCards(int count)
+        {
+            for (int i = 0; i < count; i++)
             {
-                takenCards.Add(_cards[0]);
-                DeleteCard();
+                Card card = _deck.DrawCard();
+                _player.TakeCard(card);
             }
-
-            return takenCards;
         }
-
-        private void DeleteCard()
-        {
-            _cards.RemoveAt(0);
-        }
-    }
-
-    class Card
-    {
-        public CardValue CartValue { get; private set; }
-
-        public Card(CardValue cartValue)
-        {
-            CartValue = cartValue;
-        }
-    }
-
-    enum CardValue
-    {
-        One,
-        Two,
-        Three,
-        Four,
-        Five,
-        Six,
-        Seven,
-        Eight,
-        Nine,
-        Ten,
-        Jack,
-        Queen,
-        King,
-        Ace
     }
 }
+
